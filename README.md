@@ -22,7 +22,15 @@ Use reimbursementsdb;
 
 
 4  )  Import the Schema
+
+
+ The schema.sql file is located in the backend project directory, near the Program.cs file.
+
+
+
 Open a new SQL tab
+
+
 Go to File -> Open SQL Script -> Select schema.sql and run it
 
 
