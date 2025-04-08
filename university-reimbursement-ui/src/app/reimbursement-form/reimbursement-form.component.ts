@@ -5,25 +5,23 @@ import { ReimbursementService } from '../reimbursement.service';
 import { ToastrService } from 'ngx-toastr';
 import { NgForm, AbstractControl } from '@angular/forms';
 
-
 @Component({
   selector: 'app-reimbursement-form',
   standalone: true,
   imports: [CommonModule, FormsModule],
   templateUrl: './reimbursement-form.component.html',
-  styleUrls: ['./reimbursement-form.component.css']
+  styleUrls: ['./reimbursement-form.component.css'],
 })
 export class ReimbursementFormComponent {
   formData: any = {
     purchaseDate: '',
     amount: '',
-    description: ''
+    description: '',
   };
 
   selectedFile: File | null = null;
   message: string = '';
   fileError: boolean = false;
-
 
   constructor(
     private reimbursementService: ReimbursementService,
@@ -37,95 +35,85 @@ export class ReimbursementFormComponent {
     }
   }
   showModal = false;
-reimbursements: any[] = [];
+  reimbursements: any[] = [];
 
-openModal() {
-  this.reimbursementService.getAllReimbursements().subscribe(data => {
-    this.reimbursements = data;
-    this.showModal = true;
-  });
-}
+  openModal() {
+    this.reimbursementService.getAllReimbursements().subscribe((data) => {
+      this.reimbursements = data;
+      this.showModal = true;
+    });
+  }
 
-
-closeModal() {
-  this.showModal = false;
-}
+  closeModal() {
+    this.showModal = false;
+  }
 
   onSubmit(form: NgForm): void {
-    // Step 1: Mark all form controls as touched to trigger inline validation
     if (form.invalid) {
       Object.values(form.controls).forEach((control: AbstractControl) => {
         control.markAsTouched();
       });
       return;
     }
-  
-    // Step 2: Business rule check – Purchase date should not be in the future
+
     const purchaseDate = new Date(this.formData.purchaseDate);
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-  
+
     if (purchaseDate > today) {
       this.toastr.error('Purchase date cannot be in the future.');
       return;
     }
-  
-    // Step 3: File validation
+
     this.fileError = false;
-  
+
     if (!this.selectedFile) {
       this.fileError = true;
       return;
     }
-  
+
     const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
     const fileName = this.selectedFile.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
-  
+
     if (!allowedTypes.includes(extension)) {
       this.fileError = true;
       return;
     }
-  
+
     if (this.selectedFile.size > 5 * 1024 * 1024) {
       this.fileError = true;
       return;
     }
-  
-    // Step 4: Build and submit FormData
+
     const formData = new FormData();
     formData.append('purchaseDate', this.formData.purchaseDate);
     formData.append('amount', this.formData.amount);
     formData.append('description', this.formData.description);
     formData.append('file', this.selectedFile);
-  
+
     this.reimbursementService.submitReimbursement(formData).subscribe({
       next: () => {
         this.toastr.success('Reimbursement submitted successfully!');
-  
-        // Step 5: Reset form fields
+
         this.formData = {
           purchaseDate: '',
           amount: '',
-          description: ''
+          description: '',
         };
         this.selectedFile = null;
         this.fileError = false;
-  
-        const fileInput = document.getElementById('fileInput') as HTMLInputElement;
+
+        const fileInput = document.getElementById(
+          'fileInput'
+        ) as HTMLInputElement;
         if (fileInput) fileInput.value = '';
-  
+
         form.resetForm();
       },
       error: () => {
         this.toastr.error('Submission failed. Please try again.');
-      }
+      },
     });
   }
-  
-  
-  
-  
-  
-  
 }

@@ -6,13 +6,12 @@
             <h4 class="card-title mb-4 text-center">Submit Reimbursement</h4>
             <div class="d-flex justify-content-end mb-3">
                 <button class="btn btn-outline-secondary btn-sm" (click)="openModal()">
-                   View All Submissions
+                   View  Submissions
                 </button>
               </div>
   
             <form (ngSubmit)="onSubmit(reimbursementForm)" #reimbursementForm="ngForm" novalidate>
   
-              <!-- Purchase Date -->
               <div class="mb-3">
                 <label class="form-label">Date</label>
                 <input
@@ -29,7 +28,6 @@
                 </div>
               </div>
   
-              <!-- Amount -->
               <div class="mb-3">
                 <label class="form-label">Amount</label>
                 <input
@@ -47,7 +45,6 @@
                 </div>
               </div>
   
-              <!-- Description -->
               <div class="mb-3">
                 <label class="form-label">Description</label>
                 <input
@@ -65,7 +62,6 @@
                 </div>
               </div>
   
-              <!-- File Upload -->
               <div class="mb-3">
                 <label class="form-label">Upload Receipt</label>
                 <input
@@ -85,7 +81,6 @@
                 </div>
               </div>
   
-              <!-- Submit Button -->
               <button 
               type="submit" 
               class="btn btn-primary w-100" 
