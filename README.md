@@ -44,8 +44,10 @@ If you're using IIS Express to run the backend in Visual Studio, the port may be
 
 To avoid inconsistencies and ensure stable communication between frontend and backend:
 
-✅ Prefer running the backend using https with Kestrel (by selecting the project profile instead of IIS Express in Visual Studio).
-✅ This keeps the port consistent (e.g., https://localhost:7125) and helps you avoid API failures and CORS issues due to mismatched URLs.
+-  Prefer running the backend using https with Kestrel (by selecting the project profile instead of IIS Express in Visual Studio).
+  
+
+- This keeps the port consistent (e.g., https://localhost:7125) and helps you avoid API failures and CORS issues due to mismatched URLs.
 
 
 Swagger should now load and your endpoints should work without needing to run migrations.
