@@ -1,0 +1,138 @@
+<div class="container mt-5">
+    <div class="row justify-content-center">
+      <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm">
+          <div class="card-body">
+            <h4 class="card-title mb-4 text-center">Submit Reimbursement</h4>
+            <div class="d-flex justify-content-end mb-3">
+                <button class="btn btn-outline-secondary btn-sm" (click)="openModal()">
+                   View All Submissions
+                </button>
+              </div>
+  
+            <form (ngSubmit)="onSubmit(reimbursementForm)" #reimbursementForm="ngForm" novalidate>
+  
+              <!-- Purchase Date -->
+              <div class="mb-3">
+                <label class="form-label">Date</label>
+                <input
+                  type="date"
+                  class="form-control"
+                  name="purchaseDate"
+                  [(ngModel)]="formData.purchaseDate"
+                  #purchaseDate="ngModel"
+                  [class.is-invalid]="purchaseDate.invalid && purchaseDate.touched"
+                  required
+                />
+                <div *ngIf="purchaseDate.invalid && purchaseDate.touched" class="text-danger">
+                  Purchase date is required.
+                </div>
+              </div>
+  
+              <!-- Amount -->
+              <div class="mb-3">
+                <label class="form-label">Amount</label>
+                <input
+                  type="number"
+                  class="form-control"
+                  name="amount"
+                  [(ngModel)]="formData.amount"
+                  #amount="ngModel"
+                  [class.is-invalid]="amount.invalid && amount.touched"
+                  required
+                  min="1"
+                />
+                <div *ngIf="amount.invalid && amount.touched" class="text-danger">
+                  Amount must be greater than zero.
+                </div>
+              </div>
+  
+              <!-- Description -->
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <input
+                  type="text"
+                  class="form-control"
+                  name="description"
+                  [(ngModel)]="formData.description"
+                  #description="ngModel"
+                  [class.is-invalid]="description.invalid && description.touched"
+                  required
+                  autocomplete="off"
+                />
+                <div *ngIf="description.invalid && description.touched" class="text-danger">
+                  Description is required.
+                </div>
+              </div>
+  
+              <!-- File Upload -->
+              <div class="mb-3">
+                <label class="form-label">Upload Receipt</label>
+                <input
+                type="file"
+                class="form-control"
+                id="fileInput"
+                (change)="onFileSelected($event)"
+                required
+              />
+              
+              
+                <div *ngIf="fileError" class="text-danger">
+                  Please upload a valid receipt file (.pdf, .jpg, .jpeg, .png) under 5MB.
+                </div>
+                <div *ngIf="selectedFile" class="text-muted mt-1">
+                  Selected: {{ selectedFile.name }}
+                </div>
+              </div>
+  
+              <!-- Submit Button -->
+              <button 
+              type="submit" 
+              class="btn btn-primary w-100" 
+              [disabled]="reimbursementForm.invalid || !selectedFile">
+              Submit
+            </button>
+            
+  
+            </form>
+
+            <div class="modal fade show d-block" tabindex="-1" *ngIf="showModal" style="background: rgba(0,0,0,0.5);">
+                <div class="modal-dialog modal-lg">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title">All Submissions</h5>
+                      <button type="button" class="btn-close" (click)="closeModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                      <table class="table table-bordered table-striped">
+                        <thead class="table-light">
+                          <tr>
+                            <th>Date</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr *ngFor="let item of reimbursements">
+                            <td>{{ item.purchaseDate | date:'yyyy-MM-dd' }}</td>
+                            <td>${{ item.amount }}</td>
+                            <td>{{ item.description }}</td>
+                            
+                          </tr>
+                        </tbody>
+                      </table>
+                      <div *ngIf="reimbursements.length === 0" class="text-muted text-center">No submissions found.</div>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
