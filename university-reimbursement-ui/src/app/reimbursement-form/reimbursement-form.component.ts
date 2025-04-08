@@ -72,7 +72,7 @@ export class ReimbursementFormComponent {
       return;
     }
 
-    const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png'];
+    const allowedTypes = ['.pdf', '.jpg', '.jpeg', '.png', '.docx'];
     const fileName = this.selectedFile.name.toLowerCase();
     const extension = fileName.substring(fileName.lastIndexOf('.'));
 
