@@ -32,8 +32,8 @@ export class ReimbursementFormComponent  implements OnInit{
   ) {}
   ngOnInit(): void {
     const today = new Date();
-    today.setHours(0, 0, 0, 0); // 👈 Prevent UTC time from rolling into the next day
-    this.maxDate = today.toISOString().split('T')[0]; // Format: 'yyyy-MM-dd'
+    today.setHours(0, 0, 0, 0); 
+    this.maxDate = today.toISOString().split('T')[0]; 
   
     this.reimbursementForm = this.fb.group({
       purchaseDate: ['', [Validators.required, this.noFutureDate.bind(this)]],
@@ -41,8 +41,6 @@ export class ReimbursementFormComponent  implements OnInit{
       description: ['', [Validators.required, Validators.maxLength(255)]],
       receipt: [null, Validators.required],
     });
-  
-    
   }
   
   
@@ -98,8 +96,6 @@ noFutureDate(control:AbstractControl){
       this.fileError = !this.selectedFile;
       return;
     }
-
-  
     const formData = new FormData();
     formData.append('PurchaseDate', this.reimbursementForm.get('purchaseDate')?.value);
     formData.append('Amount', this.reimbursementForm.get('amount')?.value);
