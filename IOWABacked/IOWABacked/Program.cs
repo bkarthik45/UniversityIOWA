@@ -1,4 +1,6 @@
 ﻿using IOWABacked.Data;
+using IOWABacked.Services;
+using IOWABacked.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -6,6 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     ServerVersion.AutoDetect(builder.Configuration.GetConnectionString("DefaultConnection"))));
+builder.Services.AddScoped<IFileValidatorService, FileValidatorService>();
+
 
 // Add services to the container.
 

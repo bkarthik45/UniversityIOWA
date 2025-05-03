@@ -1,133 +1,139 @@
 <div class="container mt-5">
-    <div class="row justify-content-center">
-      <div class="col-md-8 col-lg-6">
-        <div class="card shadow-sm">
-          <div class="card-body">
-            <h4 class="card-title mb-4 text-center">Submit Reimbursement</h4>
-            <div class="d-flex justify-content-end mb-3">
-                <button class="btn btn-outline-secondary btn-sm" (click)="openModal()">
-                   View  Submissions
-                </button>
-              </div>
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h4 class="card-title mb-4 text-center">Submit Reimbursement</h4>
+          <div class="d-flex justify-content-end mb-3">
+            <button class="btn btn-outline-secondary btn-sm" (click)="openModal()">
+              View Submissions
+            </button>
+          </div>
+          <div *ngIf="submissionSucces">Submitted Successfully</div>
+
+          <form [formGroup]="reimbursementForm" (ngSubmit)="onSubmit()">
+
+            <div class="mb-3">
+              <label class="form-label">Date</label>
+              <input 
+                type="date"
+                class="form-control"
+                formControlName="purchaseDate"
+                [max]="maxDate"
+                
+              />
+              <div *ngIf="reimbursementForm.get('purchaseDate')?.invalid 
+              && (reimbursementForm.get('purchaseDate')?.touched || reimbursementForm.get('purchaseDate')?.dirty)" 
+       class="text-danger">
+    <div *ngIf="reimbursementForm.get('purchaseDate')?.errors?.['required']">Date is required.</div>
+    <div *ngIf="reimbursementForm.get('purchaseDate')?.errors?.['futureDate']">Future dates are not allowed.</div>
+  </div>
   
-            <form (ngSubmit)="onSubmit(reimbursementForm)" #reimbursementForm="ngForm" novalidate>
-  
-              <div class="mb-3">
-                <label class="form-label">Date</label>
-                <input
-                  type="date"
-                  class="form-control"
-                  name="purchaseDate"
-                  [(ngModel)]="formData.purchaseDate"
-                  #purchaseDate="ngModel"
-                  [class.is-invalid]="purchaseDate.invalid && purchaseDate.touched"
-                  required
-                />
-                <div *ngIf="purchaseDate.invalid && purchaseDate.touched" class="text-danger">
-                  Purchase date is required.
+              <p *ngIf="reimbursementForm.get('purchaseDate')?.value">
+                You selected: {{ reimbursementForm.get('purchaseDate')?.value | date:'fullDate' }}
+              </p>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Amount</label>
+              <input
+                type="number"
+                class="form-control"
+                formControlName="amount"
+                min="1"
+              />
+              <div *ngIf="reimbursementForm.get('amount')?.touched && reimbursementForm.get('amount')?.errors" class="text-danger">
+                <div *ngIf="reimbursementForm.get('amount')?.errors?.['required']">
+                  Amount is required.
+                </div>
+                <div *ngIf="reimbursementForm.get('amount')?.errors?.['min']">
+                  Amount must be greater than or equal to 1.
                 </div>
               </div>
-  
-              <div class="mb-3">
-                <label class="form-label">Amount</label>
-                <input
-                  type="number"
-                  class="form-control"
-                  name="amount"
-                  [(ngModel)]="formData.amount"
-                  #amount="ngModel"
-                  [class.is-invalid]="amount.invalid && amount.touched"
-                  required
-                  min="1"
-                />
-                <div *ngIf="amount.invalid && amount.touched" class="text-danger">
-                  Amount must be greater than zero.
-                </div>
+              
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Description</label>
+              <input
+                type="text"
+                class="form-control"
+                formControlName="description"
+                autocomplete="off"
+              />
+              <p>{{reimbursementForm.get('description')?.value?.length || 0}} / 255  characters</p>
+
+              <div *ngIf="reimbursementForm.get('description')?.touched && reimbursementForm.get('description')?.invalid" class="text-danger">
+               
+                <div *ngIf = "reimbursementForm.get('description')?.errors?.['required']">Desc is required </div>
+
+              
               </div>
-  
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <input
-                  type="text"
-                  class="form-control"
-                  name="description"
-                  [(ngModel)]="formData.description"
-                  #description="ngModel"
-                  [class.is-invalid]="description.invalid && description.touched"
-                  required
-                  autocomplete="off"
-                />
-                <div *ngIf="description.invalid && description.touched" class="text-danger">
-                  Description is required.
-                </div>
-              </div>
-  
-              <div class="mb-3">
-                <label class="form-label">Upload Receipt</label>
-                <input
+            </div>
+          
+
+            <div class="mb-3">
+              <label class="form-label">Upload Receipt</label>
+              <input
                 type="file"
                 class="form-control"
-                id="fileInput"
                 (change)="onFileSelected($event)"
-                required
+                #fileInput
               />
-              
-              
-                <div *ngIf="fileError" class="text-danger">
-                  Please upload a valid receipt file (.pdf, .jpg, .jpeg, .png) under 5MB.
-                </div>
-                <div *ngIf="selectedFile" class="text-muted mt-1">
-                  Selected: {{ selectedFile.name }}
-                </div>
+              <div *ngIf="fileError" class="text-danger">
+                Please upload a valid receipt file (.pdf, .jpg, .jpeg, .png) under 5MB.
               </div>
-  
-              <button 
-              type="submit" 
-              class="btn btn-primary w-100" 
+              <div *ngIf="selectedFile" class="text-muted mt-1">
+                Selected: {{ selectedFile.name }}
+              </div>
+              <div *ngIf="!selectedFile" class="text-muted mt-1">
+                No file selected
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              class="btn btn-primary w-100"
               [disabled]="reimbursementForm.invalid || !selectedFile">
               Submit
             </button>
-            
-  
-            </form>
+          </form>
 
-            <div class="modal fade show d-block" tabindex="-1" *ngIf="showModal" style="background: rgba(0,0,0,0.5);">
-                <div class="modal-dialog modal-lg">
-                  <div class="modal-content">
-                    <div class="modal-header">
-                      <h5 class="modal-title">All Submissions</h5>
-                      <button type="button" class="btn-close" (click)="closeModal()"></button>
-                    </div>
-                    <div class="modal-body">
-                      <table class="table table-bordered table-striped">
-                        <thead class="table-light">
-                          <tr>
-                            <th>Date</th>
-                            <th>Amount</th>
-                            <th>Description</th>
-                          </tr>
-                        </thead>
-                        <tbody>
-                          <tr *ngFor="let item of reimbursements">
-                            <td>{{ item.purchaseDate | date:'yyyy-MM-dd' }}</td>
-                            <td>${{ item.amount }}</td>
-                            <td>{{ item.description }}</td>
-                            
-                          </tr>
-                        </tbody>
-                      </table>
-                      <div *ngIf="reimbursements.length === 0" class="text-muted text-center">No submissions found.</div>
-                    </div>
-                    <div class="modal-footer">
-                      <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
-                    </div>
-                  </div>
+          <div class="modal fade show d-block" tabindex="-1" *ngIf="showModal" style="background: rgba(0,0,0,0.5);">
+            <div class="modal-dialog modal-lg">
+              <div class="modal-content">
+                <div class="modal-header">
+                  <h5 class="modal-title">All Submissions</h5>
+                  <button type="button" class="btn-close" (click)="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                  <table class="table table-bordered table-striped">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Date</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr *ngFor="let item of reimbursements">
+                        <td>{{ item.purchaseDate | date:'yyyy-MM-dd' }}</td>
+                        <td>${{ item.amount }}</td>
+                        <td>{{ item.description }}</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                  <div *ngIf="reimbursements.length === 0" class="text-muted text-center">No submissions found.</div>
+                </div>
+                <div class="modal-footer">
+                  <button type="button" class="btn btn-secondary" (click)="closeModal()">Close</button>
                 </div>
               </div>
-              
+            </div>
           </div>
+
         </div>
       </div>
     </div>
   </div>
-  
+</div>

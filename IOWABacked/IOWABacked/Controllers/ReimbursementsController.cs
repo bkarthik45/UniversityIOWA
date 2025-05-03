@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using IOWABacked.Data;
 using IOWABacked.Models;
+using IOWABacked.Services.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace IOWABacked.Controllers
 {
@@ -16,48 +18,41 @@ namespace IOWABacked.Controllers
     {
         private readonly AppDbContext _context;
         private readonly IWebHostEnvironment _env;
+        private readonly IFileValidatorService _fileValidator;
+        private readonly ILogger<ReimbursementsController> _logger;
 
-        public ReimbursementsController(AppDbContext context, IWebHostEnvironment env)
+        public ReimbursementsController(AppDbContext context, IWebHostEnvironment env, IFileValidatorService fileValidator, ILogger<ReimbursementsController> logger)
         {
             _context = context;
             _env = env;
+            _fileValidator = fileValidator;
+            _logger = logger;
+
         }
 
-        [HttpPost]
+    [HttpPost]
+        [RequestSizeLimit(5 * 1024 * 1024)]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> Submit([FromForm] ReimbursementRequest request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             if (string.IsNullOrWhiteSpace(request.Description))
                 return BadRequest("Description is required.");
-            //Amount Validation
-            if (request.Amount <= 0)
-                return BadRequest("Amount must be greater than zero.");
-            //Date Validation
-            if (request.PurchaseDate == default)
-                return BadRequest("Purchase date is required.");
 
             if (request.PurchaseDate > DateTime.Today)
                 return BadRequest("Purchase date cannot be in the future.");
 
-            if (request.File == null || request.File.Length == 0)
-                return BadRequest("File is required.");
-
-            // File validation
-            var allowedExtensions = new[] { ".pdf", ".jpg", ".jpeg", ".png", ".doc", ".docx" };
-            var ext = Path.GetExtension(request.File.FileName).ToLower();
-
-            if (!allowedExtensions.Contains(ext))
-                return BadRequest("Only PDF, JPG, JPEG, PNG, DOC, and DOCX files are allowed.");
-
-            if (request.File.Length > 5 * 1024 * 1024)
-                return BadRequest("File size cannot exceed 5MB.");
+            if (!_fileValidator.IsValid(request.File, out var error))
+                return BadRequest(error);
 
             // Store file
+            var ext = Path.GetExtension(request.File.FileName);
+           
+            var uniqueFileName = $"{Path.GetFileNameWithoutExtension(request.File.FileName)}_{Guid.NewGuid()}{ext}";
             var folderPath = Path.Combine(_env.WebRootPath ?? "wwwroot", "receipts");
             Directory.CreateDirectory(folderPath);
-
-            var safeFileName = Path.GetFileNameWithoutExtension(request.File.FileName);
-            var uniqueFileName = $"{safeFileName}_{Guid.NewGuid()}{ext}";
             var filePath = Path.Combine(folderPath, uniqueFileName);
 
             using (var stream = new FileStream(filePath, FileMode.Create))
@@ -73,18 +68,29 @@ namespace IOWABacked.Controllers
                 ReceiptFileName = uniqueFileName
             };
 
-            _context.Reimbursements.Add(reimbursement);
-            await _context.SaveChangesAsync();
+            try
+            {
+                _context.Reimbursements.Add(reimbursement);
+                await _context.SaveChangesAsync();
+            }
+            catch(Exception ex)
+            {
+                if (System.IO.File.Exists(filePath))
+                    System.IO.File.Delete(filePath);
+                _logger.LogError(ex, "Error in saving reimbursement record to database.");
+                return StatusCode(500, "An error occurred while saving the reimbursement.");
+            }
 
             return Ok(new { message = "Reimbursement submitted successfully" });
         }
 
         [HttpGet]
-        public IActionResult GetAll()
+        public async Task<IActionResult> GetAll()
         {
-            var reimbursements = _context.Reimbursements
+            var reimbursements = await _context.Reimbursements
                 .OrderByDescending(r => r.PurchaseDate)
-                .ToList();
+                .ToListAsync();
+
             return Ok(reimbursements);
         }
     }

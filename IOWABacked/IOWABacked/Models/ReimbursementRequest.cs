@@ -6,16 +6,17 @@ namespace IOWABacked.Models
 {
     public class ReimbursementRequest
     {
-        [Required]
+        [Required(ErrorMessage = "Purchase date is required.")]
         public DateTime PurchaseDate { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "Amount is required.")]
+        [Range(0.01,500, ErrorMessage = "Amount must be greater than 0.")]
         public decimal Amount { get; set; }
 
-        [Required]
-        public string Description { get; set; }
+        [Required(ErrorMessage = "Description is required.")]
+        public string Description { get; set; } = string.Empty;
 
-        [Required]
-        public IFormFile? File { get; set; }
+        [Required(ErrorMessage = "Receipt file is required.")]
+        public IFormFile File { get; set; } = null!;
     }
 }
